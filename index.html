@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Trackmania Text Font Styling</title>
+		<link rel="shortcut icon" href="favicon.png" type="image/png">
+
+		<link rel="stylesheet" href="./css/style.css">
+		<link rel="stylesheet" href="./css/coloris.min.css">
+
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,slnt,wdth,wght,GRAD@6..144,-10..0,25..151,1..1000,100&display=swap" rel="stylesheet">
+	</head>
+	<body>
+		<div class="wrapper">
+			<h1 id="title" class="title styled">Trackmania Text Styling</h1>
+
+			<label for="input" class="full-width">Input (scroll down to find icons you can copy &amp; paste):</label>
+			<textarea type="text" id="input" placeholder="Your text here..." rows="3"></textarea>
+			<br>
+			<button id="import">Import exiting style string</button>
+
+			<br><br>
+
+			<label for="output" class="full-width">Output (copy &amp; paste this into the game):</label>
+			<textarea type="text" id="output" rows="3" readonly></textarea>
+
+			<br>
+
+			<label class="full-width">Preview: (<a href="#" id="preview-bg-neutral">Neutral</a>, <a href="#" id="preview-bg-dark">Dark</a>, <a href="#" id="preview-bg-light">Light</a>)</label>
+			<div id="preview" class="preview styled">&nbsp;</div>
+
+			<br>
+
+			<label class="full-width">Styles (click a character in the preview box above to select where to apply the style):</label>
+
+			<div class="element-buttons">
+				<button data-type="default-style" title="Reset all styles to default">Default Text Style</button>
+				<button data-type="default-color" title="Reset colour to default">Default Colour</button>
+				<div>
+					<input type="text" data-coloris id="color-picker" value="#ff0000"><button data-type="color" title="Change text colour">Colour</button>
+				</div>
+				<button data-type="bold" title="Toggle bold text style">Toggle Bold</button>
+				<button data-type="italic" title="Toggle italic text style">Toggle Italic</button>
+				<button data-type="uppercase" title="Toggle uppercase text style">Toggle Uppercase</button>
+				<button data-type="drop-shadow" title="Toggle drop shadow style">Toggle Drop Shadow</button>
+				<button data-type="default-width" title="Reset text width to normal">Default Width</button>
+				<button data-type="wide-width" title="Add wide text style">Wide Width</button>
+				<button data-type="narrow-width" title="Add narrow text style">Narrow Width</button>
+			</div>
+
+			<br>
+
+			<table class="element-list">
+				<thead>
+					<tr>
+						<th class="nowrap">Char</th>
+						<th>Type</th>
+						<th>Options</th>
+						<th class="nowrap">Delete</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+
+			<br>
+
+			<div><button id="delete-all">DELETE ALL STYLES</button></div>
+
+			<br>
+
+			<h2>Icons</h2>
+
+			<p><small>Credit to <a href="https://github.com/openplanet-nl/maniaicons" target="_blank">Openplanet</a> for the icon font</small></p>
+
+			<label class="full-width">Unicode:</label>
+
+			<div class="icon-list">£€$¥Ƀ¢¤©®™ⓂⓅ△⬜♢○◉◎✂✄✔✖✅✘❌♠♥♦♣♤♡♢♧≈∅°µπ§¶·—‘’“”†‡•…‽⁂№•·⏎⌫★☆☐☑☒☛☞✓✗〃⎘☍⎀✂⏰⏱⏲⏳⏴⏵⏶⏷⏸⏹⏺🔁☺⌨✎✍✉←↑→↓↔↕⇄⇅↲↳↰↱↱⇤⇥↶↷↻⟳⟲➔↯↖➘➙➚➟⇠➤⇦⇨⇨«»►◀▲▼▷◁△▽➴●⏳★☆🔥🔧🔗🕑♫♪🔊💡❄⚑🔒🔓🔎🎧🌐🎥💾🎮🏃🏆🏆🏁💢💿📷🔍🔧🔨🔀🔀🔂🔂🔑📎👤👥🔔🔕</div>
+
+			<br>
+
+			<label class="full-width">Font Awesome:</label>
+
+			<div class="icon-list">                                                                                                                                                                                                                                                                                                                                                                    </div>
+
+			<br>
+
+			<label class="full-width">Kenney Icons:</label>
+
+			<div class="icon-list">                                                                                                                                                                        </div>
+
+			<div class="credits">
+				<span class="credits-by">Created by: miraclewhips</span>
+
+				<div class="credits-links">
+					<img src="images/globe.svg" width="18">
+					<a href="https://miraclewhips.dev/" target="_blank">miraclewhips.dev</a>
+
+					<span class="credits-separator">&bull;</span>
+
+					<img src="images/discord.svg" width="18">
+					<span>miraclewhips</span>
+
+					<span class="credits-separator">&bull;</span>
+
+					<img src="images/github.svg" width="18">
+					<a href="https://github.com/miraclewhips/" target="_blank">miraclewhips</a>
+				</div>
+			</div>
+		</div>
+
+		<script src="./js/coloris.min.js" type="text/javascript"></script>
+		<script src="./js/main.js" type="text/javascript"></script>
+	</body>
+</html>
