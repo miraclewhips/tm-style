@@ -1,4 +1,4 @@
-let CHAR_INDEX = 0;
+let SELECTED_CHARS = [0];
 let ELEMENT_HISTORY = [];
 let ELEMENT_HISTORY_SP = 0;
 let ELEMENTS = [];
@@ -41,12 +41,23 @@ Coloris({
 	alpha: false,
 	onChange: (color) => {
 		for(const el of ELEMENTS) {
-			if(el.index !== CHAR_INDEX) continue;
+			if(SELECTED_CHARS.indexOf(el.index) === -1) continue;
 			if(el.type !== 'color') continue;
 			el.color = color;
-			update();
 		}
+		update();
 	}
+});
+
+colorPicker.addEventListener('close', () => {
+	elementHistoryReplace();
+	update();
+});
+
+const colorBlending = document.getElementById('color-blending');
+colorBlending.addEventListener('input', () => {
+	window.localStorage.setItem('colorBlending', colorBlending.value);
+	update();
 });
 
 const elementList = document.querySelector('.element-list tbody');
@@ -223,6 +234,24 @@ function elementHistoryPush() {
 	ELEMENT_HISTORY_SP = 0;
 }
 
+function elementHistoryReplace() {
+	if(ELEMENT_HISTORY_SP > 0) {
+		const index = ELEMENT_HISTORY.length - ELEMENT_HISTORY_SP;
+		ELEMENT_HISTORY.splice(index);
+	}
+
+	if(ELEMENT_HISTORY.length === 0) {
+		elementHistoryPush();
+	}else{
+		ELEMENT_HISTORY[ELEMENT_HISTORY.length - 1] = {
+			value: input.value,
+			elements: JSON.parse(JSON.stringify(ELEMENTS))
+		}
+	}
+
+	ELEMENT_HISTORY_SP = 0;
+}
+
 function elementHistoryUndo() {
 	if(ELEMENT_HISTORY.length - ELEMENT_HISTORY_SP > 1) {
 		ELEMENT_HISTORY_SP++;
@@ -248,44 +277,46 @@ function sameElementGroup(type1, type2) {
 }
 
 function addElement(e) {
-	if(CHAR_INDEX < 0 || CHAR_INDEX >= input.value.length) return;
+	for(const CHAR of SELECTED_CHARS) {
+		if(CHAR < 0 || CHAR >= input.value.length) return;
 
-	const element = {
-		index: CHAR_INDEX,
-		type: e.target.dataset.type,
-	}
-
-	if(element.type === 'color') {
-		element.blend = false;
-	}
-
-	let addNew = true;
-
-	for(let i = 0; i < ELEMENTS.length; i++) {
-		if(ELEMENTS[i].index !== element.index) continue;
-		if(!sameElementGroup(ELEMENTS[i].type, element.type)) continue;
-
-		if(elementTypes[element.type].togglable && ELEMENTS[i].type === element.type) {
-			addNew = false;
+		const element = {
+			index: CHAR,
+			type: e.target.dataset.type,
 		}
 
-		const old = ELEMENTS.splice(i, 1);
-
-		if(old[0].type === 'color') {
-			colorPicker.value = old[0].color;
-			element.blend = old[0].blend;
+		if(element.type === 'color') {
+			element.blend = false;
 		}
 
-		break;
-	}
+		let addNew = true;
 
-	if(element.type === 'color') {
-		element.color = colorPicker.value;
-		colorPicker.click();
-	}
+		for(let i = 0; i < ELEMENTS.length; i++) {
+			if(ELEMENTS[i].index !== element.index) continue;
+			if(!sameElementGroup(ELEMENTS[i].type, element.type)) continue;
 
-	if(addNew) {
-		ELEMENTS.push(element);
+			if(elementTypes[element.type].togglable && ELEMENTS[i].type === element.type) {
+				addNew = false;
+			}
+
+			const old = ELEMENTS.splice(i, 1);
+
+			if(old[0].type === 'color') {
+				colorPicker.value = old[0].color;
+				element.blend = old[0].blend;
+			}
+
+			break;
+		}
+
+		if(element.type === 'color') {
+			element.color = colorPicker.value;
+			colorPicker.click();
+		}
+
+		if(addNew) {
+			ELEMENTS.push(element);
+		}
 	}
 
 	elementHistoryPush();
@@ -313,7 +344,7 @@ function updateElementList() {
 		const row = document.createElement('tr');
 		row.dataset.index = el.index;
 
-		if(el.index === CHAR_INDEX) {
+		if(SELECTED_CHARS.indexOf(el.index) !== -1) {
 			row.classList.add('is-active');
 		}
 
@@ -386,15 +417,48 @@ function updateElementList() {
 }
 
 function selectChar(e) {
-	for(const char of preview.querySelectorAll('.is-selected')) {
-		char.classList.remove('is-selected');
+	const index = parseInt(e.target.dataset.index);
+
+	if(!e.ctrlKey && !e.shiftKey) {
+		SELECTED_CHARS = [];
 	}
 
-	CHAR_INDEX = parseInt(e.target.dataset.index);
-	e.target.classList.add('is-selected');
+	let removedExisting = false;
+
+	for(let i = SELECTED_CHARS.length - 1; i >= 0; i--) {
+		if(SELECTED_CHARS[i] === index) {
+			removedExisting = true;
+			SELECTED_CHARS.splice(i, 1);
+		}
+	}
+
+	if(e.shiftKey) {
+		const lastChar = SELECTED_CHARS[SELECTED_CHARS.length - 1];
+		if(index < lastChar) {
+			for(let i = lastChar - 1; i > index; i--) {
+				if(SELECTED_CHARS.indexOf(i) === -1) {
+					SELECTED_CHARS.push(i);
+				}
+			}
+		}else if(index > lastChar) {
+			for(let i = lastChar + 1; i < index; i++) {
+				if(SELECTED_CHARS.indexOf(i) === -1) {
+					SELECTED_CHARS.push(i);
+				}
+			}
+		}
+	}
+
+	if(!(e.ctrlKey && removedExisting)) {
+		SELECTED_CHARS.push(index);
+	}
+
+	for(const char of preview.querySelectorAll('span')) {
+		char.classList.toggle('is-selected', SELECTED_CHARS.indexOf(parseInt(char.dataset.index)) !== -1);
+	}
 
 	for(const row of elementList.querySelectorAll('tr')) {
-		row.classList.toggle('is-active', parseInt(row.dataset.index) === CHAR_INDEX);
+		row.classList.toggle('is-active', SELECTED_CHARS.indexOf(parseInt(row.dataset.index)) !== -1);
 	}
 
 	saveData();
@@ -443,10 +507,10 @@ function invlerp(start, end, val) {
 
 function blendColors(color1, color2, startIndex, endIndex, currentIndex) {
 	const p = invlerp(startIndex, endIndex, currentIndex) * 100;
-
+	
 	const div = document.createElement('div');
 	div.style.display = 'none';
-	div.style.color = `color-mix(in hsl, ${color1} ${100 - p}%, ${color2} ${p}%)`;
+	div.style.color = `color-mix(in ${colorBlending.value}, ${color1} ${100 - p}%, ${color2} ${p}%)`;
 	document.body.appendChild(div);
 	const result = getComputedStyle(div).color;
 	div.remove();
@@ -489,7 +553,7 @@ function generateText(inputString, elementArray, previewDiv) {
 		span.dataset.index = i;
 		span.textContent = chars[i];
 
-		if(CHAR_INDEX === i) {
+		if(SELECTED_CHARS.indexOf(i) !== -1) {
 			span.classList.add('is-selected');
 		}
 
@@ -593,9 +657,9 @@ function generateText(inputString, elementArray, previewDiv) {
 
 function toggleButtonDisabled() {
 	let isActive = true;
-	if(CHAR_INDEX >= input.value.length) CHAR_INDEX = 0;
+	if(SELECTED_CHARS.length === 0) SELECTED_CHARS = [0];
 
-	if(CHAR_INDEX < 0 || input.value.trim().length === 0) {
+	if(input.value.trim().length === 0) {
 		isActive = false;
 	}
 
@@ -610,7 +674,7 @@ function toggleButtonDisabled() {
 
 function saveData() {
 	window.localStorage.setItem('input', input.value);
-	window.localStorage.setItem('charIndex', CHAR_INDEX);
+	window.localStorage.setItem('selectedChars', JSON.stringify(SELECTED_CHARS));
 	window.localStorage.setItem('elements', JSON.stringify(ELEMENTS));
 	window.localStorage.setItem('previewBg', PREVIEW_BG);
 }
@@ -621,12 +685,11 @@ function loadData() {
 		input.value = savedValue;
 	}
 
-	const savedCharIndex = window.localStorage.getItem('charIndex');
-	if(savedCharIndex) {
-		const index = parseInt(savedCharIndex);
-		if(index >= 0 && index < input.value.length) {
-			CHAR_INDEX = index;
-		}
+	const savedSelectedChars = window.localStorage.getItem('selectedChars');
+	if(savedSelectedChars) {
+		try {
+			SELECTED_CHARS = JSON.parse(savedSelectedChars);
+		}catch(e){}
 	}
 
 	const savedElements = window.localStorage.getItem('elements');
@@ -639,6 +702,11 @@ function loadData() {
 	const savedPreviewBg = window.localStorage.getItem('previewBg');
 	if(savedPreviewBg) {
 		setPreviewBg(null, savedPreviewBg);
+	}
+
+	const savedColorBlending = window.localStorage.getItem('colorBlending');
+	if(savedColorBlending) {
+		colorBlending.value = savedColorBlending;
 	}
 }
 

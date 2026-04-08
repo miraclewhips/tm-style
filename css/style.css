@@ -85,6 +85,7 @@ textarea[readonly] {
 	font-weight: 700;
 	color: #fff;
 	border-radius: 0.5rem;
+	user-select: none;
 }
 
 .preview.bg-dark {
